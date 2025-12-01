@@ -1,0 +1,4 @@
+train_accuracy: 0.5000
+test_accuracy: 0.3000
+recall: 0.3056
+f1_score: 0.2593
