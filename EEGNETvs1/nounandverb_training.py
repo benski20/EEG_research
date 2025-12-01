@@ -37,14 +37,16 @@ def EEGNet(nb_classes, Chans=4, Samples=60, dropoutRate=0.5, kernLength=64, F1=8
 with open("eeg_fft_nounvsverb_JASON_dataset.pkl", "rb") as f:
     data = pickle.load(f)
 
-X = np.array(data["data"])    # shape: (N, 4, 1000)
-y = np.array(data["labels"])    # shape: (N,)
-X = X.reshape(-1, 4, 60)
+X = np.array(data["data"])    # shape: (50, 250, 4, 60) 
+y = np.array(data["labels"])    # shape: (12500,)
+
+X = X.reshape(-1, 4, 60) # --> (50, 250, 4, 60) --> (12500, 4, 60)
+
 # === Normalize (per trial)
 X = (X - X.mean(axis=2, keepdims=True)) / X.std(axis=2, keepdims=True)
 
 # === Reshape for CNN input
-X = X[..., np.newaxis]     # shape: (N, 4, 1000, 1)
+X = X[..., np.newaxis]     # shape: (12500, 4, 60, 1)
 
 # === Apply static channel reweighting to reduce artifact influence
 # TP channels (1 & 2): weight = 1.0
@@ -68,7 +70,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratif
 
 # === Save model (optional)
 import time
-#model.save(f"eegnet_noun_verb_averagepooling_50epochs_regular_arch_12500samples{time.strftime('%Y%m%d-%H%M')}.h5")
+# model.save(f"eegnet_noun_verb_averagepooling_50epochs_regular_arch_12500samples{time.strftime('%Y%m%d-%H%M')}.h5")
 # print("\n✅ Model trained and saved")
 model = load_model("eegnet_noun_verb_averagepooling_50epochs_regular_arch_12500samples20250805-2223.h5")  # Load your trained model here
 loss, accuracy = model.evaluate(X_test, y_test)
@@ -276,7 +278,7 @@ plt.title('Top LIME Feature Contributions (Vertical)')
 plt.xticks(rotation=45, ha = "right", fontsize=6)
 plt.axhline(0, color='gray', linewidth=0.8)
 plt.tight_layout()
-plt.savefig("plots/eegnet_noun_verb_averagepooling_50epochs_regular_arch__12500samples_featureimportance.png")
+#plt.savefig("plots/eegnet_noun_verb_averagepooling_50epochs_regular_arch__12500samples_featureimportance.png")
 plt.show()
 
 

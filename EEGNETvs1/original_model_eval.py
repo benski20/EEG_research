@@ -5,12 +5,12 @@ import pickle
 import numpy as np
 import os
 from sklearn.model_selection import train_test_split
-with open("eeg_fft_nounvsverb_JASON_dataset.pkl", "rb") as f:
+with open("eeg_raw_dataset.pkl", "rb") as f:
     data = pickle.load(f)
 
-X = np.array(data["data"])    # shape: (N, 4, 1000)
-y = np.array(data["labels"])    # shape: (N,)
-X = X.reshape(-1, 4, 60)    # shape: (N,)
+X = np.array(data["X"])    # shape: (N, 4, 1000)
+y = np.array(data["y"])    # shape: (N,)
+# X = X.reshape(-1, 4, 60)    # shape: (N,)
 
 # === Normalize (per trial)
 X = (X - X.mean(axis=2, keepdims=True)) / X.std(axis=2, keepdims=True)
@@ -24,13 +24,13 @@ X = X[..., np.newaxis]     # shape: (N, 4, 1000, 1)
 channel_weights = np.array([1, 0.6, 0.6, 1]).reshape(1, 4, 1, 1) ##not needed for attention model
 X = X #* channel_weights  # Apply to all samples but dont use for testing
 
-y = y - 1
+# y = y - 1
 # === One-hot encode labels
-y = to_categorical(y, num_classes=2)
+y = to_categorical(y, num_classes=3)
 
 # === Train/Test Split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
-
+print(len(X_train), len(X_test))
 def evaluate_attention_model(model_path, X_train, y_train, X_test, y_test, n_runs=100):
     print(f"Evaluating {model_path} for {n_runs} runs...")
 
@@ -103,32 +103,15 @@ def save_results(results, model_name):
 
 # === Run evaluation for all attention models ===
 attention_model_files = [
-    "eegnet_noun_verb_averagepooling_50epochs_regular_arch_12500samples20250805-2223.h5"
+    "eegnet_model_1.h5"
 ]
 
-output_dir = "noun_verb_fft_model_evaluation_results"
+output_dir = "original_model_evaluation_results_corrected"
 os.makedirs(output_dir, exist_ok=True)
 
 for model_file in attention_model_files:
     results = evaluate_attention_model(model_file, X_train, y_train, X_test, y_test, n_runs=100)
     save_results(results, model_file)
 
-# # Select a random trial from the test set
-# model = load_model("eegnet_model_1.h5")
-# import random
-# random_index = random.randint(0, len(X_test) - 1)
-# print(f"Selected Trial Index: {random_index}")
-# new_trial = X_test[random_index]
-# new_trial_label = y_test[random_index]
-# new_trial_label = np.argmax(new_trial_label)  # Convert one-hot to class index
-# print(f"Trial Label: {new_trial_label}")  # Print the label for the trial
 
-
-# new_trial = new_trial[np.newaxis, ..., np.newaxis]  # shape: (1, 4, 1000, 1)
-#  # Print the one-hot encoded label for the trial
-
-# prediction = model.predict(new_trial)
-# predicted_class = np.argmax(prediction)
-
-# print(f"Predicted Class: {predicted_class}")
 

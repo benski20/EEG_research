@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-folder = "noun_verb_fft_model_evaluation_results"  # Change to your folder path
+folder = "original_model_evaluation_results_corrected"  # Change to your folder path
 files = [f for f in os.listdir(folder) if f.endswith("_confusion_matrix.npy")]
 files.sort()
 
 num_matrices = len(files)
-cols = min(4, num_matrices)   # max 3 per row
+cols = min(3, num_matrices)   # max 3 per row
 rows = math.ceil(num_matrices / cols)
 
 fig, axes = plt.subplots(rows, cols, figsize=(4*cols, 4*rows))  # smaller figure size
@@ -46,5 +46,5 @@ for idx in range(num_matrices, rows*cols):
     fig.delaxes(axes[r, c])
 
 plt.tight_layout()
-plt.savefig("plots/noun_verb_fft_model_evaluation_average_confusion_matrices.png", dpi=300, bbox_inches='tight')
+plt.savefig("plots/original_model_eval_correct.png", dpi=300, bbox_inches='tight')
 plt.show()

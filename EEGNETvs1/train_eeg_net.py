@@ -37,20 +37,20 @@ def EEGNet(nb_classes, Chans=4, Samples=1000, dropoutRate=0.5, kernLength=64, F1
 with open("eeg_raw_dataset.pkl", "rb") as f:
     data = pickle.load(f)
 
-X = np.array(data["X"])    # shape: (N, 4, 1000)
-y = np.array(data["y"])    # shape: (N,)
+X = np.array(data["X"])    # shape: (50, 4, 1000) 
+y = np.array(data["y"])    # shape: (50,)
 
 # === Normalize (per trial)
 X = (X - X.mean(axis=2, keepdims=True)) / X.std(axis=2, keepdims=True)
 
 # === Reshape for CNN input
-X = X[..., np.newaxis]     # shape: (N, 4, 1000, 1)
+X = X[..., np.newaxis]     # shape: (50, 4, 1000, 1)
 
 # === Apply static channel reweighting to reduce artifact influence
 # TP channels (1 & 2): weight = 1.0
 # Frontal channels (3 & 4): weight = 0.6
 channel_weights = np.array([1, 1, 0.6, 0.6]).reshape(1, 4, 1, 1)
-X = X * channel_weights  # Apply to all samples but dont use for testing
+X = X # channel_weights  # Apply to all samples but dont use for testing
 
 
 # === One-hot encode labels
@@ -68,7 +68,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratif
 # === Save model (optional)
 import time
 # model.save(f"eegnet_model_1_averagepooling_50epochs_channelweighted[5501]{time.strftime('%Y%m%d-%H%M')}.h5")
-# print("\n✅ Model trained and saved")
+print("\n✅ Model trained and saved")
 model = load_model("eegnet_model_1_averagepooling_50epochs_channelweighted[1166]20250731-2243.h5")  # Load your trained model here
 # loss, accuracy = model.evaluate(X_test, y_test)
 # print(f"\n✅ Test Accuracy: {accuracy:.4f}")
